@@ -1,0 +1,12 @@
+name: mwi-decode
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pip
+  - netcdf4
+  - jupyter
+  - satpy=0.41.0
+  - cartopy 
+  - python-geotiepoints
+  - pip:
