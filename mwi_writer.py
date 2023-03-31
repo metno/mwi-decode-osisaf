@@ -360,6 +360,20 @@ def write_osisaf_nc(mwidata,
         snc_tb18h.long_name = "BT 18H GHz"
         snc_tb18h.coordinates = "dtime lat_l lon_l"
 
+        # - tb23v
+        snc_tb23v = ds.createVariable('tb23v', tb_type, ('n_scanl', 'n_scanp'),
+                                      fill_value=tb_fv)
+        snc_tb23v.units = "K"
+        snc_tb23v.long_name = "BT 23V GHz"
+        snc_tb23v.coordinates = "dtime lat_l lon_l"
+
+        # - tb23h
+        snc_tb23h = ds.createVariable('tb23h', tb_type, ('n_scanl', 'n_scanp'),
+                                      fill_value=tb_fv)
+        snc_tb23h.units = "K"
+        snc_tb23h.long_name = "BT 23H GHz"
+        snc_tb23h.coordinates = "dtime lat_l lon_l"
+
         # - tb31v
         snc_tb31v = ds.createVariable('tb31v', tb_type, ('n_scanl', 'n_scanp'),
                                       fill_value=tb_fv)
@@ -373,6 +387,20 @@ def write_osisaf_nc(mwidata,
         snc_tb31h.units = "K"
         snc_tb31h.long_name = "BT 31H GHz"
         snc_tb31h.coordinates = "dtime lat_l lon_l"
+
+        # - tb50v
+        snc_tb50v = ds.createVariable('tb50v', tb_type, ('n_scanl', 'n_scanp'),
+                                      fill_value=tb_fv)
+        snc_tb50v.units = "K"
+        snc_tb50v.long_name = "BT 50V GHz"
+        snc_tb50v.coordinates = "dtime lat_l lon_l"
+
+        # - tb50h
+        snc_tb50h = ds.createVariable('tb50h', tb_type, ('n_scanl', 'n_scanp'),
+                                      fill_value=tb_fv)
+        snc_tb50h.units = "K"
+        snc_tb50h.long_name = "BT 50H GHz"
+        snc_tb50h.coordinates = "dtime lat_l lon_l"
 
         if not skip_n90:
             # - scanline
@@ -547,16 +575,20 @@ def write_osisaf_nc(mwidata,
         # assign each variable a value
         vals = {}
         ncvar = {}
-        datas = ['lon_l', 'lat_l', 'sat_xyz', 'tb18v', 'tb18h',
-                 'tb31v', 'tb31h', 'dtime', 'scanline', 'scanpos', 'n_scanl',
-                 'n_scanp']
+        datas = ['lon_l', 'lat_l', 'sat_xyz', 'tb18v', 'tb18h', 'tb23v',
+                 'tb23h', 'tb31v', 'tb31h', 'tb50v', 'tb50h', 'dtime',
+                 'scanline', 'scanpos', 'n_scanl', 'n_scanp']
         vals['lon_l'] = mwidata['lon_l']
         vals['lat_l'] = mwidata['lat_l']
         vals['sat_xyz'] = sat_xyz
         vals['tb18v'] = mwidata['tb18v']
         vals['tb18h'] = mwidata['tb18h']
+        vals['tb23v'] = mwidata['tb23v']
+        vals['tb23h'] = mwidata['tb23h']
         vals['tb31v'] = mwidata['tb31v']
         vals['tb31h'] = mwidata['tb31h']
+        vals['tb50v'] = mwidata['tb50v']
+        vals['tb50h'] = mwidata['tb50h']
         vals['dtime'] = dtime_l
         vals['scanline'] = scanline_l
         vals['scanpos'] = scanpos_l
@@ -567,8 +599,12 @@ def write_osisaf_nc(mwidata,
         ncvar['sat_xyz'] = snc_sat_xyz
         ncvar['tb18v'] = snc_tb18v
         ncvar['tb18h'] = snc_tb18h
+        ncvar['tb23v'] = snc_tb23v
+        ncvar['tb23h'] = snc_tb23h
         ncvar['tb31v'] = snc_tb31v
         ncvar['tb31h'] = snc_tb31h
+        ncvar['tb50v'] = snc_tb50v
+        ncvar['tb50h'] = snc_tb50h
         ncvar['dtime'] = snc_dtime
         ncvar['scanline'] = snc_scanline
         ncvar['scanpos'] = snc_scanpos
@@ -660,7 +696,9 @@ def write_osisaf_nc(mwidata,
 
     if plot:
         label = {'tb18v': 'Tb 18v (K)', 'tb18h': 'Tb 18h (K)',
+                 'tb23v': 'Tb 18v (K)', 'tb23h': 'Tb 18h (K)',
                  'tb31v': 'Tb 31v (K)', 'tb31h': 'Tb 31h (K)',
+                 'tb50v': 'Tb 31v (K)', 'tb50h': 'Tb 31h (K)',
                  'tb89v': 'Tb 89v (K)', 'tb89h': 'Tb 89h (K)'}
 
         start_time = "{:%Y%m%d%H%M%S}".format(filename_data.start_time)
@@ -668,7 +706,8 @@ def write_osisaf_nc(mwidata,
         area_def = pr.utils.load_area('/disk2/pytroll/pyresample/docs/areas.cfg', 'pc_world')
         # Doing l data
         swath_l = pr.geometry.SwathDefinition(lon_l, lat_l)
-        l_data_to_plot = ['tb18v', 'tb18h', 'tb31v', 'tb31h']
+        l_data_to_plot = ['tb18v', 'tb18h', 'tb23v', 'tb23h', 'tb31v',
+                          'tb31h', 'tb50v', 'tb50h']
         for l_data in l_data_to_plot:
             print("Doing ", l_data)
             result_l = pr.kd_tree.resample_nearest(swath_l, eval(l_data),
