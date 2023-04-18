@@ -33,7 +33,8 @@ def parse_args():
                    'filenames contain commas')
     p.add_argument('-o', '--outname', required=False, default=None,
                    help='Output pathname for the processed file. A default '
-                   'name is used if this is not set')
+                   'name is used if this is not set. A directory can be '
+                   'provided here for the default output name')
     p.add_argument('-l', '--lmaskpath', required=False, default=None,
                    help='Landmask path if the output should be filtered '
                    'by landmask')
@@ -51,24 +52,36 @@ def main():
     args = parse_args()
     # Turn the infiles into a list
     infiles = args.infiles.split('+')
-
-    # Creating an output name if there isn't one, and turning it into a
-    # full path if it isn't
-    if args.outname is None:
-        outname = infiles[0].replace('nc', '_s.nc')
-    else:
-        outname = args.outname
-    if os.path.isfile(outname):
-        outname = os.path.join('.', outname)
-    outdir = os.path.dirname(outname)
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
+    outname = args.outname
     lmaskpath = args.lmaskpath
 
     # Call the decoder
     tp1 = time.time()
     mwi_data = data_select(infiles)
     tp2 = time.time()
+
+    # Check if outname is a NetCDF file
+    if outname is not None and outname.endswith('.nc'):
+        outname = outname
+    # If not, create an output name
+    else:
+        # If outname exists but it not a .nc file, assume it is a directory
+        if outname is not None:
+            outdir = outname
+        else:
+            outdir = '.'
+        # Set an automatic filename
+        datetimes_l = mwi_data['time_start_scan_utc_l']
+        datetimes_h = mwi_data['time_start_scan_utc_h']
+        swath_beg_datetime_l = (min(dt for dt in datetimes_l if dt.year > 1))
+        swath_beg_datetime_h = (min(dt for dt in datetimes_h if dt.year > 1))
+        swath_beg_datetime = min(swath_beg_datetime_l,
+                                 swath_beg_datetime_h)
+        outname = 'mwi_sgb1_{:%Y%m%d%H%M}_s.nc'.format(swath_beg_datetime)
+        outname = os.path.join(outdir, outname)
+    outdir = os.path.dirname(outname)
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
 
     # Call the writer
     write_osisaf_nc(mwi_data, outname, lmaskpath=lmaskpath)

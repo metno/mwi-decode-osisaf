@@ -249,6 +249,8 @@ def data_select(infiles):
     mwidata['orbit_start'] = min(orbit_start)
     mwidata['processor_version'] = ','.join(set(processor_version))
 
+    mwidata['from_file'] = ','.join(infiles)
+
     print("Done with data_select_coarsen")
 
     return mwidata
