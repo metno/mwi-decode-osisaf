@@ -237,6 +237,18 @@ def data_select(infiles):
         [datetime.utcfromtimestamp(t.astype(datetime) * 1.0e-9)
          for t in tss_utc_h])
 
+    # Getting a bit more metadata
+    # Note - using python netCDF dataset on these files seems OK as it
+    # does not open all the data
+    orbit_start = []
+    processor_version = []
+    for infile in infiles:
+        dataset = Dataset(infile, 'r')
+        orbit_start.append(dataset.__dict__['orbit_start'])
+        processor_version.append(dataset['status']['processing'].__dict__['processor_version'])
+    mwidata['orbit_start'] = min(orbit_start)
+    mwidata['processor_version'] = ','.join(set(processor_version))
+
     print("Done with data_select_coarsen")
 
     return mwidata

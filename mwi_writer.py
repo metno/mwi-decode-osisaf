@@ -226,6 +226,8 @@ def write_osisaf_nc(mwidata,
         # ds.orbit_number = filename_data.start_orbit
         ds.satellite = "metopsg-b1"
         ds.scanline_length = nb_scanpos_l
+        ds.orbit_start = mwidata['orbit_start']
+        ds.processor_version = mwidata['processor_version']
 
         ds.createDimension('time', 1)
         ds.createDimension('n_scanl', 0)  # Unlimited dimension
