@@ -90,9 +90,11 @@ def data_select(infiles):
 
     # Reading in the scene
     reader_kwargs = {'calibration': 'brightness_temperature'}
+    # TODO - This call needs to deal with the situation where there is a
+    # bad file, without throwing out all the files.
     scene = Scene(filenames=infiles, reader='mwi_l1b_nc',
                   reader_kwargs=reader_kwargs)
-
+        
     # Filtering the data
     rawdata = {}
     coarsedata = {}

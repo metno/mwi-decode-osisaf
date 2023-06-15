@@ -172,7 +172,7 @@ def get_satellite_pos(swath_file=None, lons=None, lats=None, swath_nscanpos=None
                 for k in instr_alt.keys():
                     if os.path.basename(name).startswith(k):
                         if k == 'mwi':
-                            print("WARNING: MWI altitude and instrument azimuth data is prelimiary.")
+                            print("WARNING: MWI altitude and instrument azimuth data is preliminary.")
                         sat_height = instr_alt[k] * 1000.0
                         sat_view_angle = 90.0 - instr_theta[k]
             else:

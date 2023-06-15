@@ -15,6 +15,7 @@ import pandas as pd
 import timeit
 import time
 from dask.distributed import Client
+from glob import glob
 
 from mwi_writer import write_osisaf_nc
 from decode_mwi import data_select
@@ -28,9 +29,12 @@ def parse_args():
 
     p = argparse.ArgumentParser('concatenate_paramfiles',
                                 formatter_class=RawDescriptionHelpFormatter)
-    p.add_argument('-i', '--infiles', required=True,
+    p.add_argument('-i', '--inputs', required=True,
                    help='Input MWI files, PLUS-separated (+) because the '
-                   'filenames contain commas')
+                   'filenames contain commas, or else a directory')
+    p.add_argument('-p', '--pattern', required=False,
+                   default="W_XX-EUMETSAT*nc",
+                   help="Input pattern for compiling a list of files")
     p.add_argument('-o', '--outname', required=False, default=None,
                    help='Output pathname for the processed file. A default '
                    'name is used if this is not set. A directory can be '
@@ -50,8 +54,11 @@ def main():
 
     # Processing the arguments
     args = parse_args()
-    # Turn the infiles into a list
-    infiles = args.infiles.split('+')
+    # Finding a list of the input files:
+    if os.path.isdir(args.inputs):
+        infiles = sorted(glob(os.path.join(args.inputs, args.pattern)))
+    else:
+        infiles = args.inputs.split('+')
     outname = args.outname
     lmaskpath = args.lmaskpath
 
@@ -77,7 +84,8 @@ def main():
         swath_beg_datetime_h = (min(dt for dt in datetimes_h if dt.year > 1))
         swath_beg_datetime = min(swath_beg_datetime_l,
                                  swath_beg_datetime_h)
-        outname = 'mwi_sgb1_{:%Y%m%d%H%M}_s.nc'.format(swath_beg_datetime)
+        outname = 'mwi_sgb1_n{}_{:%Y%m%d%H%M}_s.nc'.format(
+            str(mwi_data['orbit_start']), swath_beg_datetime)
         outname = os.path.join(outdir, outname)
     outdir = os.path.dirname(outname)
     if not os.path.exists(outdir):
