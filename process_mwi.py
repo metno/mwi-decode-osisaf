@@ -42,6 +42,10 @@ def parse_args():
     p.add_argument('-l', '--lmaskpath', required=False, default=None,
                    help='Landmask path if the output should be filtered '
                    'by landmask')
+    p.add_argument('-c', '--chanlist',
+                   default="tb18v,tb18h,tb23v,tb23h,tb31v,tb31h,tb89v,tb89h",
+                   help="Select only the required bands in a comma-separated "
+                   "list")
 
     args = p.parse_args()
 
@@ -54,6 +58,8 @@ def main():
 
     # Processing the arguments
     args = parse_args()
+    chanlist = args.chanlist.split(',')
+
     # Finding a list of the input files:
     if os.path.isdir(args.inputs):
         infiles = sorted(glob(os.path.join(args.inputs, args.pattern)))
@@ -64,7 +70,7 @@ def main():
 
     # Call the decoder
     tp1 = time.time()
-    mwi_data = data_select(infiles)
+    mwi_data = data_select(infiles, chanlist)
     tp2 = time.time()
 
     # Check if outname is a NetCDF file
@@ -92,7 +98,7 @@ def main():
         os.makedirs(outdir)
 
     # Call the writer
-    write_osisaf_nc(mwi_data, outname, lmaskpath=lmaskpath)
+    write_osisaf_nc(mwi_data, outname, chanlist, lmaskpath=lmaskpath)
     print("Written {}".format(outname))
     tp3 = time.time()
 

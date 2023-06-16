@@ -53,8 +53,7 @@ def coarsen_along_scanlines(rawdata):
             kernel = res[chan_info[get_band('{}v'.format(item))][3]][0]
         else:
             kernel = res[chan_info[get_band(item)][3]][0]
-            
-            
+
         # For lat/lon, select values using a stride rather than an averaging.
         # Note: The stride settings are critical to match the length of the
         # coarsened data
@@ -83,7 +82,7 @@ def coarsen_along_scanlines(rawdata):
     return coarsened_ds
 
 
-def data_select(infiles):
+def data_select(infiles, chanlist):
     """
     Selecting the MWI data to match as closely as possible to SSMIS"
     """
@@ -94,15 +93,16 @@ def data_select(infiles):
     # bad file, without throwing out all the files.
     scene = Scene(filenames=infiles, reader='mwi_l1b_nc',
                   reader_kwargs=reader_kwargs)
-        
+
     # Filtering the data
     rawdata = {}
     coarsedata = {}
     seldata = {}
     mwidata = {}
 
-    bandlist = chan_info.keys()
-    lllist = list(set([a[1] for a in chan_info.values()]))
+    # Filter the channels to read according to the provided list
+    bandlist = [get_band(c) for c in chanlist]
+    lllist = list(set([a[1] for a in chan_info.values() if a[2] in chanlist]))
 
     # Read in the uncoarsened data
     # Using only one dask chunk for now
@@ -124,7 +124,7 @@ def data_select(infiles):
     # Now coarsening the data
     print("Coarsening the data")
     coarsedata = coarsen_along_scanlines(rawdata)
-    
+
     # Finally collocate the data, using the 31GHz as the base grid (from
     # which both l and h grids are taken)
     print("Collocating the data")

@@ -82,6 +82,7 @@ def timedelta_total_seconds(td):
 
 def write_osisaf_nc(mwidata,
                     outname,
+                    chanlist,
                     lmaskpath=None,
                     plot=False,
                     min_lat=0.,
@@ -95,6 +96,8 @@ def write_osisaf_nc(mwidata,
         os.makedirs(outdir)
 
     skip_n90 = False
+    if not 'tb89v' in chanlist and not 'tb89v' in chanlist:
+        skip_n90 = True
     dtime_2d = False
     pack_tbs = False
     ssmi_nb_scanpos = 64 # TODO - check
@@ -342,69 +345,6 @@ def write_osisaf_nc(mwidata,
         snc_dtime.long_name = "time difference from reference time"
         snc_dtime.scale_factor = np.array(1.0).astype('f4')
 
-        if pack_tbs:
-            tb_scale, tb_offset = cu.get_scale_offset((90., 300.), (-32700, 32700))
-            tb_type = 'i2'
-        else:
-            tb_type = 'f4'
-        tb_fv = cu.getFillValue(tb_type)
-
-        # - tb18v
-        snc_tb18v = ds.createVariable('tb18v', tb_type, ('n_scanl', 'n_scanp'),
-                                      fill_value=tb_fv)
-        snc_tb18v.units = "K"
-        snc_tb18v.long_name = "BT 18V GHz"
-        snc_tb18v.coordinates = "dtime lat_l lon_l"
-
-        # - tb18h
-        snc_tb18h = ds.createVariable('tb18h', tb_type, ('n_scanl', 'n_scanp'),
-                                      fill_value=tb_fv)
-        snc_tb18h.units = "K"
-        snc_tb18h.long_name = "BT 18H GHz"
-        snc_tb18h.coordinates = "dtime lat_l lon_l"
-
-        # - tb23v
-        snc_tb23v = ds.createVariable('tb23v', tb_type, ('n_scanl', 'n_scanp'),
-                                      fill_value=tb_fv)
-        snc_tb23v.units = "K"
-        snc_tb23v.long_name = "BT 23V GHz"
-        snc_tb23v.coordinates = "dtime lat_l lon_l"
-
-        # - tb23h
-        snc_tb23h = ds.createVariable('tb23h', tb_type, ('n_scanl', 'n_scanp'),
-                                      fill_value=tb_fv)
-        snc_tb23h.units = "K"
-        snc_tb23h.long_name = "BT 23H GHz"
-        snc_tb23h.coordinates = "dtime lat_l lon_l"
-
-        # - tb31v
-        snc_tb31v = ds.createVariable('tb31v', tb_type, ('n_scanl', 'n_scanp'),
-                                      fill_value=tb_fv)
-        snc_tb31v.units = "K"
-        snc_tb31v.long_name = "BT 31V GHz"
-        snc_tb31v.coordinates = "dtime lat_l lon_l"
-
-        # - tb31h
-        snc_tb31h = ds.createVariable('tb31h', tb_type, ('n_scanl', 'n_scanp'),
-                                      fill_value=tb_fv)
-        snc_tb31h.units = "K"
-        snc_tb31h.long_name = "BT 31H GHz"
-        snc_tb31h.coordinates = "dtime lat_l lon_l"
-
-        # - tb50v
-        #snc_tb50v = ds.createVariable('tb50v', tb_type, ('n_scanl', 'n_scanp'),
-        #                              fill_value=tb_fv)
-        #snc_tb50v.units = "K"
-        #snc_tb50v.long_name = "BT 50V GHz"
-        #snc_tb50v.coordinates = "dtime lat_l lon_l"
-
-        # - tb50h
-        #snc_tb50h = ds.createVariable('tb50h', tb_type, ('n_scanl', 'n_scanp'),
-        #                              fill_value=tb_fv)
-        #snc_tb50h.units = "K"
-        #snc_tb50h.long_name = "BT 50H GHz"
-        #snc_tb50h.coordinates = "dtime lat_l lon_l"
-
         if not skip_n90:
             # - scanline
             snc_n_scanl_h = ds.createVariable('n_scanl_h', 'i2', ('n_scanl_h'),
@@ -419,26 +359,30 @@ def write_osisaf_nc(mwidata,
             snc_n_scanp_h.long_name = "Position along a scanline"
 
             # - scanline
-            snc_scanline_h = ds.createVariable('scanline_h', 'i2', ('n_scanl_h', 'n_scanp_h'),
+            snc_scanline_h = ds.createVariable('scanline_h', 'i2',
+                                               ('n_scanl_h', 'n_scanp_h'),
                                                fill_value=cu.getFillValue('i2'))
             snc_scanline_h.units = "1"
             snc_scanline_h.long_name = "Scanline number high res"
 
             # - scanpos
-            snc_scanpos_h = ds.createVariable('scanpos_h', 'i2', ('n_scanl_h', 'n_scanp_h'),
+            snc_scanpos_h = ds.createVariable('scanpos_h', 'i2',
+                                              ('n_scanl_h', 'n_scanp_h'),
                                               fill_value=cu.getFillValue('i2'))
             snc_scanpos_h.units = "1"
             snc_scanpos_h.long_name = "Position along scanline, high res obs"
 
             # - lat_h
-            snc_lat_h = ds.createVariable('lat_h', 'f4', ('n_scanl_h', 'n_scanp_h'),
+            snc_lat_h = ds.createVariable('lat_h', 'f4',
+                                          ('n_scanl_h', 'n_scanp_h'),
                                           fill_value=cu.getFillValue('f4'))
             snc_lat_h.units = "degrees_north"
             snc_lat_h.long_name = "latitude high res obs"
             snc_lat_h.datum = "wgs84"
 
             # - lon_h
-            snc_lon_h = ds.createVariable('lon_h', 'f4', ('n_scanl_h', 'n_scanp_h'),
+            snc_lon_h = ds.createVariable('lon_h', 'f4',
+                                          ('n_scanl_h', 'n_scanp_h'),
                                           fill_value=cu.getFillValue('f4'))
             snc_lon_h.units = "degrees_east"
             snc_lon_h.long_name = "longitude high res obs"
@@ -465,22 +409,32 @@ def write_osisaf_nc(mwidata,
             snc_dtime_h.long_name = "time difference from reference time for high res obs"
             snc_dtime_h.scale_factor = np.array(1.0).astype('f4')
 
+        if pack_tbs:
+            tb_scale, tb_offset = cu.get_scale_offset((90., 300.),
+                                                      (-32700, 32700))
+            tb_type = 'i2'
+        else:
+            tb_type = 'f4'
+        tb_fv = cu.getFillValue(tb_type)
 
-            # - tb89v
-            snc_tb89v = ds.createVariable('tb89v', tb_type, ('n_scanl_h',
-                                                             'n_scanp_h'),
-                                          fill_value=tb_fv)
-            snc_tb89v.units = "K"
-            snc_tb89v.long_name = "BT 89V GHz"
-            snc_tb89v.coordinates = "dtime_h lat_h lon_h"
+        # - Channels
+        snc_chan = {}
+        for chan in chanlist:
+            if chan in ['tb89v', 'tb89h']:
+                chandim = ('n_scanl_h', 'n_scanp_h')
+                chancoords = "dtime_h lat_h lon_h"
+            else:
+                chandim = ('n_scanl', 'n_scanp')
+                chancoords = "dtime lat_l lon_l"
+            chanlongname = "BT {} GHz".format(chan[2:5].upper())
 
-            # - tb89h
-            snc_tb89h = ds.createVariable('tb89h', tb_type, ('n_scanl_h',
-                                                             'n_scanp_h'),
-                                          fill_value=tb_fv)
-            snc_tb89h.units = "K"
-            snc_tb89h.long_name = "BT 89H GHz"
-            snc_tb89h.coordinates = "dtime_h lat_h lon_h"
+            snc_chan[chan] = ds.createVariable(chan, tb_type,
+                                               chandim,
+                                               fill_value=tb_fv)
+            snc_chan[chan].units = "K"
+            snc_chan[chan].long_name = chanlongname
+            snc_chan[chan].coordinates = chancoords
+
 
         # Load the FarFromWaterMask objects if there is a landmask path set
         ffwmasks = []
@@ -578,23 +532,11 @@ def write_osisaf_nc(mwidata,
         # assign each variable a value
         vals = {}
         ncvar = {}
-        #datas = ['lon_l', 'lat_l', 'sat_xyz', 'tb18v', 'tb18h', 'tb23v',
-        #         'tb23h', 'tb31v', 'tb31h', 'tb50v', 'tb50h', 'dtime',
-        #         'scanline', 'scanpos', 'n_scanl', 'n_scanp']
-        datas = ['lon_l', 'lat_l', 'sat_xyz', 'tb18v', 'tb18h', 'tb23v',
-                 'tb23h', 'tb31v', 'tb31h', 'dtime',
-                 'scanline', 'scanpos', 'n_scanl', 'n_scanp']
+        datas = ['lon_l', 'lat_l', 'sat_xyz', 'dtime', 'scanline', 'scanpos',
+                 'n_scanl', 'n_scanp']
         vals['lon_l'] = mwidata['lon_l']
         vals['lat_l'] = mwidata['lat_l']
         vals['sat_xyz'] = sat_xyz
-        vals['tb18v'] = mwidata['tb18v']
-        vals['tb18h'] = mwidata['tb18h']
-        vals['tb23v'] = mwidata['tb23v']
-        vals['tb23h'] = mwidata['tb23h']
-        vals['tb31v'] = mwidata['tb31v']
-        vals['tb31h'] = mwidata['tb31h']
-        #vals['tb50v'] = mwidata['tb50v']
-        #vals['tb50h'] = mwidata['tb50h']
         vals['dtime'] = dtime_l
         vals['scanline'] = scanline_l
         vals['scanpos'] = scanpos_l
@@ -603,26 +545,16 @@ def write_osisaf_nc(mwidata,
         ncvar['lon_l'] = snc_lon_l
         ncvar['lat_l'] = snc_lat_l
         ncvar['sat_xyz'] = snc_sat_xyz
-        ncvar['tb18v'] = snc_tb18v
-        ncvar['tb18h'] = snc_tb18h
-        ncvar['tb23v'] = snc_tb23v
-        ncvar['tb23h'] = snc_tb23h
-        ncvar['tb31v'] = snc_tb31v
-        ncvar['tb31h'] = snc_tb31h
-        #ncvar['tb50v'] = snc_tb50v
-        #ncvar['tb50h'] = snc_tb50h
         ncvar['dtime'] = snc_dtime
         ncvar['scanline'] = snc_scanline
         ncvar['scanpos'] = snc_scanpos
         ncvar['n_scanl'] = snc_n_scanl
         ncvar['n_scanp'] = snc_n_scanp
         if not skip_n90:
-            datas += ['lon_h', 'lat_h', 'tb89v', 'tb89h', 'dtime_h',
-                      'scanline_h', 'scanpos_h', 'n_scanp_h', 'n_scanl_h']
+            datas += ['lon_h', 'lat_h', 'dtime_h', 'scanline_h', 'scanpos_h',
+                      'n_scanp_h', 'n_scanl_h']
             vals['lon_h'] = mwidata['lon_h']
             vals['lat_h'] = mwidata['lat_h']
-            vals['tb89v'] = mwidata['tb89v']
-            vals['tb89h'] = mwidata['tb89h']
             vals['dtime_h'] = dtime_h
             vals['scanline_h'] = scanline_h
             vals['scanpos_h'] = scanpos_h
@@ -630,13 +562,16 @@ def write_osisaf_nc(mwidata,
             vals['n_scanp_h'] = n_scanp_h
             ncvar['lon_h'] = snc_lon_h
             ncvar['lat_h'] = snc_lat_h
-            ncvar['tb89v'] = snc_tb89v
-            ncvar['tb89h'] = snc_tb89h
             ncvar['dtime_h'] = snc_dtime_h
             ncvar['scanline_h'] = snc_scanline_h
             ncvar['scanpos_h'] = snc_scanpos_h
             ncvar['n_scanl_h'] = snc_n_scanl_h
             ncvar['n_scanp_h'] = snc_n_scanp_h
+        # Add the channel data
+        datas.extend(chanlist)
+        for chan in chanlist:
+            vals[chan] = mwidata[chan]
+            ncvar[chan] = snc_chan[chan]
 
         # Discard scanlines fully masked.
         mask_l_subset = mask_l.all(axis=1)
@@ -701,42 +636,28 @@ def write_osisaf_nc(mwidata,
         pass
 
     if plot:
-        label = {'tb18v': 'Tb 18v (K)', 'tb18h': 'Tb 18h (K)',
-                 'tb23v': 'Tb 18v (K)', 'tb23h': 'Tb 18h (K)',
-                 'tb31v': 'Tb 31v (K)', 'tb31h': 'Tb 31h (K)',
-                 #'tb50v': 'Tb 31v (K)', 'tb50h': 'Tb 31h (K)',
-                 'tb89v': 'Tb 89v (K)', 'tb89h': 'Tb 89h (K)'}
-
         start_time = "{:%Y%m%d%H%M%S}".format(filename_data.start_time)
         print("Start plotting data ... ")
         area_def = pr.utils.load_area('/disk2/pytroll/pyresample/docs/areas.cfg', 'pc_world')
-        # Doing l data
-        swath_l = pr.geometry.SwathDefinition(lon_l, lat_l)
-        #l_data_to_plot = ['tb18v', 'tb18h', 'tb23v', 'tb23h', 'tb31v',
-        #                  'tb31h', 'tb50v', 'tb50h']
-        l_data_to_plot = ['tb18v', 'tb18h', 'tb23v', 'tb23h', 'tb31v', 'tb31h']
-        for l_data in l_data_to_plot:
-            print("Doing ", l_data)
-            result_l = pr.kd_tree.resample_nearest(swath_l, eval(l_data),
-                                                   area_def,
-                                                   radius_of_influence=30000,
-                                                   fill_value=None)
-            pr.plot.save_quicklook(l_data + '-' + start_time + '-quick.png',
-                                   area_def, result_l, num_meridians=0,
-                                   num_parallels=90, label=label[l_data])
 
+        swath_l = pr.geometry.SwathDefinition(lon_l, lat_l)
         if not skip_n90:
             swath_h = pr.geometry.SwathDefinition(lon_h, lat_h)
-            h_data_to_plot = ['tb89v', 'tb89h']
-            for h_data in h_data_to_plot:
-                print("Doing ", h_data)
-                result_h = pr.kd_tree.resample_nearest(swath_h, eval(h_data),
-                                                       area_def,
-                                                    radius_of_influence=30000,
-                                                    fill_value=None)
-                pr.plot.save_quicklook(h_data + '-' + start_time + '-quick.png',
-                                       area_def, result_h, num_meridians=0,
-                                       num_parallels=90, label=label[h_data])
+
+        for chan in chanlist:
+            if chan in ['tb89v', 'tb89h']:
+                cswath = swath_h
+            else:
+                cswath = swath_l
+            clabel = "Tb {} (K)".format(chan[2:5])
+            print("Doing {}".format(chan))
+            resamp = pr.kd_tree.resample_nearest(cswath, eval(chan),
+                                                 area_def,
+                                                 radius_of_influence=30000,
+                                                 fill_value=None)
+            pr.plot.save_quicklook('{}-{}-quick.png'.format(chan, start_time),
+                                   area_def, resamp, num_meridians=0,
+                                   num_parallels=90, label=clabel)
 
         print("Done plotting.")
     return True
