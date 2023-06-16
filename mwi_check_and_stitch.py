@@ -96,6 +96,11 @@ def mwi_check_and_stitch():
     else:
         slist = [s[1] for s in zflist]
 
+    # If the list of new files is empty, should exit at this point
+    if not slist:
+        print("No new files found")
+        sys.exit(1)
+
     # Logic to select based on orbit number. Find the number of unique
     # orbit numbers that have arrived since the last created output file
     nlist = [patt.match(os.path.basename(s))[1] for s in slist]
