@@ -103,7 +103,13 @@ def mwi_check_and_stitch():
 
     # Logic to select based on orbit number. Find the number of unique
     # orbit numbers that have arrived since the last created output file
-    nlist = [patt.match(os.path.basename(s))[1] for s in slist]
+    nlist = []
+    for s in slist:
+        try:
+            n = patt.match(os.path.basename(s))[1]
+            nlist.append(n)
+        except:
+            pass
     orbnum_to_rerun = set(nlist)
 
     # Find all files with each orbit number
